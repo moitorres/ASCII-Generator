@@ -14,54 +14,57 @@
 (require racket/draw) ; Library to open a ppm image
 (require pict)	 
  	 	
+
     ;Function that opens an image and returns a bitmap
     (define (open-image filename)
-
+        
+        ;Create a bitmap
+        (define bitmap (make-object bitmap% 300 300))
+        
         ;The image is loaded and saved into a bitmap
-        (define image (make-object bitmap% filename))
+        (send bitmap load-file filename)
 
         ;The program checks if the image was loaded successfully
-        (if (send image ok?)
+        (if (send bitmap ok?)
             (displayln "Image loaded successfully")
             (displayln "Error while loading image"))
-        
-        (send image get-width)
 
-        ;(define image2 (make-monochrome-bitmap 300 300 ))
-        ;(send image2 get-width)
-    )
+        ;Return the bitmap
+        bitmap)
 
+
+    ;Main function of the program
     (define (main in-file)
 
-        (displayln "Main Thread Starting")
-
-        (define in (open-input-file in-file))
-
-        (read-ppm in)
+        ;Load the image and save it into a bitmap structure
+        (define bitmap-image (open-image in-file))
         
-        (close-input-port in))
+        ;Transform the image into grayscale
+        (define grayscale-image (color->gray bitmap-image))
+        
+        ;Save the new image
+        (send grayscale-image save-file "./test.jpeg" 'jpeg)
+        
+    )
 
-
-
-    (define (read-ppm port)
-        (parameterize ([current-input-port port])
-            (define magic (read))
-            (define width (read))
-            (define height (read))
-            (define maxcol (read))
-            (define bm (make-object bitmap% width height))
-            (define dc (new bitmap-dc% [bitmap bm]))
-            (send dc set-smoothing 'unsmoothed)
-            (define (adjust v) (* 255 (/ v maxcol)))
-            (for/list ([x width ])
-                (for/list ([y height ])
-                    (printf "Fila ~a , Columna ~a \n" x y)
-                    
-                    (define red (read))
-                    (define green (read))
-                    (define blue (read))
-
-                    (define color (make-object color% (adjust red) (adjust green) (adjust blue)))
-                    (send dc set-pen color 1 'solid)
-                    (send dc draw-point x y) ))
-        bm))
+    ;Function 
+    (define (color->gray color-bm)
+        (define color-dc (new bitmap-dc% [bitmap color-bm]))
+        (define-values (w h) (send color-dc get-size))
+        (define width (exact-floor w))
+        (define height (exact-floor h))
+        (define gray-bm (make-bitmap width height))
+        (define gray-dc (new bitmap-dc% [bitmap gray-bm]))
+        (define pixels (make-bytes (* 4 width height)))
+        (send color-dc get-argb-pixels 0 0 width height pixels)
+        (for ([i (in-range 0 (* 4 width height) 4)])
+            (define α (bytes-ref pixels i))
+            (define r (bytes-ref pixels (+ i 1)))
+            (define g (bytes-ref pixels (+ i 2)))
+            (define b (bytes-ref pixels (+ i 3)))
+            (define l (exact-floor (+ (* 0.2126 r) (* 0.7152 g) (* 0.0722 b))))    
+            (bytes-set! pixels (+ i 1) l)
+            (bytes-set! pixels (+ i 2) l)
+            (bytes-set! pixels (+ i 3) l))
+        (send gray-dc set-argb-pixels 0 0 width height pixels)
+        gray-bm)
