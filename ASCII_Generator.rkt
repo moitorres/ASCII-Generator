@@ -9,7 +9,6 @@
 
 |#
 
-
 #lang racket
 (require racket/draw) ; Library to open an image and save it into a bitmap	 
 
@@ -48,14 +47,22 @@
     (define bitmap-image (open-image in-file))
     
     ;Transform the image into grayscale and store the pixels into a list
-    (define grayscale-image (color->gray bitmap-image))
+    ;Here our image is no longer a bitmap% and is instead a list of lists with the value of the pixels
+    (define list-image (get-pixels bitmap-image))
     
     ;Scale the image to have the proper aspect ratio according to the size of the pixels
-    (define scaled-image (aspect-ratio grayscale-image))
+    (define scaled-image (aspect-ratio list-image))
 
     (channel-put out-channel scaled-image)
     (channel-put out-channel 'end)
 )
+
+
+; ********************************************** WORK IN PROGRES ************************************************************
+;Function that transforms a list with the values of pixels to a list with ascii characters
+;(define (pixels->ascii)
+
+;)
 
 
 ;Function that opens an image from a file and returns a bitmap structure
@@ -73,7 +80,7 @@
 
 
 ;Function that receives a bitmap with a loaded color image and returns a list of lists (for each row of pixels) with the pixel values in grayscale
-(define (color->gray color-bitmap)
+(define (get-pixels color-bitmap)
     ;A bitmap-dc is created out of the bitmap
     (define color-bitmap-dc (new bitmap-dc% [bitmap color-bitmap]))
     ;The width and height of the bitmap are saved into variables
@@ -89,11 +96,11 @@
     (send color-bitmap-dc get-argb-pixels 0 0 width height pixels)
     ;The function "pixels->list" is called to transform the pixels into a list of pixels
     ;Each pixel inside the list will contain the grayscale value of the pixel
-    (pixels->list pixels width height))
+    (bitmap->list pixels width height))
 
 
 ;Function that receives a pixel structure and returns a list of lists of pixels, according to the width an the height of the image
-(define (pixels->list pixels width height) 
+(define (bitmap->list pixels width height) 
     ;Loop that goes through all the pixels stored in the pixels structure
     (let loop
         ([current-pixel 0] ;Number of the current pixel
@@ -114,28 +121,19 @@
                 (if (equal? column width)
                     ;If this is the last column
                     (loop
-                        ;The next pixel is the current pixel plus 4, because each pixel has 4 values for the argb
-                        (+ current-pixel 4)
-                        ;The loop changes to the next row
-                        (+ row 1)
-                        ;The columns are resetted to 1
-                        1
-                        ;The list of the row (with the value of the current pixel) is appended to the result list
-                        (append grayscale-pixels (list (append current-row (list l))))
-                        ;The list of the row is resetted and emptied
-                        empty)
+                        (+ current-pixel 4) ;The next pixel is the current pixel plus 4, because each pixel has 4 values for the argb
+                        (+ row 1) ;The loop changes to the next row
+                        1 ;The columns are resetted to 1
+                        (append grayscale-pixels (list (append current-row (list l)))) ;The list of the row (with the value of the current pixel) is appended to the result list
+                        empty) ;The list of the row is resetted and emptied 
+
                     ;If this is not the last column
                     (loop
-                        ;The next pixel is the current pixel plus 4, because each pixel has 4 values for the argb
-                        (+ current-pixel 4)
-                        ;The row is the same
-                        row
-                        ;The loop changes to the next column
-                        (+ column 1)
-                        ;The result list is the same
-                        grayscale-pixels
-                        ;The value of the current pixel is appended to the list of the row
-                        (append current-row (list l)) ))))))
+                        (+ current-pixel 4) ;The next pixel is the current pixel plus 4, because each pixel has 4 values for the argb
+                        row ;The row is the same
+                        (+ column 1) ;The loop changes to the next column
+                        grayscale-pixels ;The result list is the same
+                        (append current-row (list l)))))))) ;The value of the current pixel is appended to the list of the row
 
 
 ;Function that, given a structure of pixels and the current pixel, returns the luminance value of that pixel
@@ -153,68 +151,64 @@
     (exact-floor (+ (* 0.2126 r) (* 0.7152 g) (* 0.0722 b))))
 
 
-;Function that divides the image into grids of 3x3 pixels and reeplaces the grid with the average of those pixels
+;Function that divides the image into grids of 3x3 pixels and replaces the grid with the average of those pixels
 ;This is so the original aspect-ratio of the image is maintained, as an ASCII character is a lot bigger than a pixel
 (define (aspect-ratio pixels)
 
-    ;Get the rounded number of rows and columns in the image
+    ;Get the rounded number of rows and columns in the image divided by three
     (define _rows (exact-floor (/ (length pixels) 3)))
-    
     (define _columns (exact-floor(/ (length (car pixels)) 3)))
 
-    ;Loop that goes over
+    ;Loop that goes over the whole list of pixels
     (let loop
-        ([rows _rows]
-         [columns _columns]
-         [pixels pixels]
-         [current-row empty]
-         [result empty])
+        ([rows _rows] ;Number of the current row. It starts at the max value for the rows and ends at zero
+         [columns _columns] ;Number of the current column. It starts at the max value for the columns and ends at zero
+         [pixels pixels] ;List of lists that contains the values for the pixels of the image by rows.
+         [current-row empty] ;List to store the resulting pixel values of the current row
+         [result empty]) ;List of lists that stores the resulting pixel values of the whole image by rows
         
+        ;If the current row is at number zero, it means the loop has gone over all the image
         (if (zero? rows)
-
+            ;It returns the result's list
             result
-
+            ;If the loop hasn't finished
             (let()
-                (define pixel1 (caar pixels))
-                (define pixel2 (car (cdr (car pixels))))
-                ;(define pixel2 (cadar pixels))
-                (define pixel3 (caddar pixels))
-                (define pixel4 (car (car (cdr pixels))))
-                ;(define pixel4 (cdaar pixels))
-                (define pixel5 (car (cdr (car (cdr pixels)))))
-                ;(define pixel5 (cdadar pixels))
-                (define pixel6 (car (cdr (cdr (car (cdr pixels))))))
-                ;(define pixel6 (cdaddar pixels))
-                (define pixel7 (car (car (cdr (cdr pixels)))))
-                ;(define pixel7 (cddaar pixels))
-                (define pixel8 (car (cdr (car (cdr (cdr pixels))))))
-                ;(define pixel8 (cddadar pixels))
-                (define pixel9 (car (cdr (cdr (car (cdr (cdr pixels)))))))
-                ;(define pixel9 (cddaddar pixels))
+                
+                ;The 9 pixels that will be part of the current grid are obtained
+                (define pixel1 (caar pixels)) ;The first pixel of the current row
+                (define pixel2 (cadar pixels)) ;The second pixel of the current row
+                (define pixel3 (caddar pixels)) ;The third pixel of the current row
+                (define pixel4 (caadr pixels)) ;The first pixel of the next row
+                (define pixel5 (cadadr pixels)) ;The second pixel of the next row
+                (define pixel6 (caddar (cdr pixels))) ;The third pixel of the next row
+                (define pixel7 (caaddr pixels)) ;The first pixel of the third row
+                (define pixel8 (cadadr (cdr pixels))) ;The second pixel of the third row
+                (define pixel9 (caddar (cddr pixels))) ;The third pixel of the third row
+                
+                ;The average value of the pixels is calculated and rounded
+                (define average (round (/ (+ pixel1 pixel2 pixel3 pixel4 pixel5 pixel6 pixel7 pixel8 pixel9) 9)))
 
-                (define average (/ (+ pixel1 pixel2 pixel3 pixel4 pixel5 pixel6 pixel7 pixel8 pixel9) 9))
-
+                ;If the current column minus 1 is equal to zero, it means this is the last column of the row
                 (if (zero? (- columns 1 ))
-                    
+
+                    ;If this is the last column
                     (loop
-                        (- rows 1)
-                        _columns
-                        (cdddr pixels)
-                        empty
-                        (append result (list (append current-row (list average)))))      
-
+                        (- rows 1) ;The value of the current row diminishes by one
+                        _columns ;The value for the columns is resetted to the max value for columns
+                        (cdddr pixels) ;The three first rows of the list of pixels are eliminated
+                        empty ;The list for the resulting values of the current row is resetted and emptied
+                        (append result (list (append current-row (list average))))) ;The current row of pixels (plus the current average) is appended to the list of results
+                    
+                    ;If this isn't the last column of the row
                     (let()
-
-                        ;(cadddr pixels)
-                        (define new-first-row (cdr (cdr (cdr (car pixels)))))
-                        ;(cdadddr pixels)
-                        (define new-second-row (cdr (cdr (cdr (car (cdr pixels))))))
-                        ;(cddadddr pixels)
-                        (define new-third-row (cdr (cdr (cdr (car (cdr (cdr pixels)))))))
-                        
+                        ;The first three rows are updated by deleting the first three pixels of each row
+                        (define new-first-row (cdddar pixels))
+                        (define new-second-row (cdddar (cdr pixels)))
+                        (define new-third-row (cdddar (cddr pixels)))
+                        ;The loop is called
                         (loop
-                            rows
-                            (- columns 1)
-                            (append (list new-first-row) (list new-second-row) (list new-third-row) (cdddr pixels))
-                            (append current-row (list average))
-                            result)  ))))))
+                            rows ;The value for the row stays the same
+                            (- columns 1) ;The value for the columns diminishes by one
+                            (append (list new-first-row) (list new-second-row) (list new-third-row) (cdddr pixels)) ;The value for pixels is updated with the first three rows
+                            (append current-row (list average)) ;The current average is appended to the list of results for the current row
+                            result))))))) ;The resulting list stays the same
