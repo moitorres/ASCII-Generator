@@ -31,6 +31,7 @@ The topics seen in class that we will use in the program are:
 - Lists: We will use lists to store the values for the pixels and to send them to the threads so they can process them.
 
 ## How to run the program
+1. First clone the git repositry with "git clone" 
 2. First you will need to have racket intsalled in your computer : https://docs.racket-lang.org/pollen/Installation.html
 3. Run **Racket** in your terminal if you have Linux or in Dr. Racket for other OS
   -> using the comand "racket" inside the location where the code is
