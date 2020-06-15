@@ -28,5 +28,17 @@ The topics seen in class that we will use in the program are:
 - Functional programming: We will be using racket to do the program, so we will need to use functional programming.
 - File input/output: We will read an image file and then output the result into a text file.
 - Lists: We will use lists to store the values for the pixels and to send them to the threads so they can process them.
-- Concurrency: We will use threds to write and print the ascii resutls at the same time.
+
+## How to run the program
+2. First you will need to have racket intsalled in your computer : https://docs.racket-lang.org/pollen/Installation.html
+3. Run **Racket** in your terminal if you have Linux or in Dr. Racket for other OS
+  -> using the comand "racket" inside the location where the code is
+4. Then use the following comand to start the program: 
+  -> (enter! "Ascii_Generator.rkt")
+5. And then create your ASCII image with an begin the program using the following comand:
+  -> (main "Test_images/not_bad.jpg")
+  - main is the function that will start to run the program
+  - Test_images is where we have saved our fine selection of images to test
+  - After the  **/** the rest is the name of the image you wish to convert to ascii
+6. And done enjoy your ASCII generator!!!
 
