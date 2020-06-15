@@ -15,7 +15,7 @@
 ## Problem description
 
 Our project consists on a program that transforms an image into a representation of that image using ASCII code. The user will input the image they want to transform and the result will be printed into a text file. The resulting image will look as the following one:
--[](Test_images/mona_lisa.jpg)
+![](Test_images/mona_lisa.jpg)
 
 ## Solution
 
