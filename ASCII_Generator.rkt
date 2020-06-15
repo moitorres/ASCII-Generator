@@ -34,7 +34,7 @@
                     (close-output-port out)
                     (printf "Printer thread finishing\n")]
                 ;If the message is a string
-                [(list? msg)
+                [(string? msg)
                     ;The thread prints it to the file and repeats the loop
                     (display msg out)
                     (loop)])))))
@@ -56,13 +56,50 @@
     ;Chnge the pixels values into ascii
     (define ascii-image (pixels->ascii scaled-image))
 
-    (channel-put out-channel ascii-image)
+    (list-printer ascii-image)
+
     (channel-put out-channel 'end)
 )
 
 
 ; ********************************************** Functions ************************************************************
 
+;Function that transforms a prints a list of lists into a text file
+(define (list-printer image )
+    (let loop
+        ([image (cdr image)] ;variable to save the list of pixels
+        [current-row (car image)]) ; variable to store the current row of pixel values
+
+        ;If to check if the list of pixels is empty
+        (if(empty? image)
+
+            ;If the ascii-img is empty it means the loop has finished and the program has finished as well
+            (printf "Image transformed to ascii succesfully \n")
+
+             ;Else, the loop continues
+            (let ()
+
+                ;The character of the current row is printed into the text file
+                (channel-put out-channel (car current-row))
+
+               ;Check if the row is empty
+               (if (empty? (cdr current-row))
+
+                    ;If the row is empy then saves the converted ascii row in the result 
+                    (let()
+                        (channel-put out-channel (format "\n"))
+                        (loop
+                            ;Changes row
+                            (cdr image)
+                            ;Here the current-row becones the next line of the ascii-img
+                            (car image)))
+
+                    ;Else the currnet-row still has values
+                    (loop
+                        ;The line stays the same
+                        image
+                        ;Moves the values inside the current-row
+                        ( cdr current-row)))))))
 
 
 ;Function that opens an image from a file and returns a bitmap structure
