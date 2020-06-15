@@ -51,9 +51,11 @@
     (define grayscale-image (color->gray bitmap-image))
     
     (define scaled-image (aspect-ratio grayscale-image))
+    
+    (printf "~a ~a" (length scaled-image) (length (car scaled-image)))
 
-    (channel-put out-channel scaled-image)
-    (channel-put out-channel 'end)
+    ;(channel-put out-channel scaled-image)
+    ;(channel-put out-channel 'end)
 )
 
 
@@ -99,16 +101,17 @@
                 (define average (/ (+ pixel1 pixel2 pixel3 pixel4 pixel5 pixel6 pixel7 pixel8 pixel9) 9))
 
                 (if (zero? (- columns 1 ))
-                    (let()
+                    
+                    (let ()
                         (loop
                             (- rows 1)
                             _columns
                             (cdddr pixels)
                             empty
                             (append result (list (append current-row (list average))))
-                        )                    
+                        )      
                     )
-
+                
 
                     (let()
 
@@ -118,12 +121,11 @@
                         (define new-second-row (cdr (cdr (cdr (car (cdr pixels))))))
                         ;(cddadddr pixels)
                         (define new-third-row (cdr (cdr (cdr (car (cdr (cdr pixels)))))))
-                        ;(printf "~a\n" (append (list new-first-row) (list new-second-row) (list new-third-row) (list (cdddr pixels))))
-                        (channel-put out-channel (format "Columns: ~a \n Pixels: ~a \n" columns (append (list (append (list new-first-row) (list new-second-row))) (list (append (list new-third-row) (list (cdddr pixels)))))))
+                        
                         (loop
-                            _rows
+                            rows
                             (- columns 1)
-                            (append (list new-third-row) (list (cdddr pixels)))
+                            (append (list new-first-row) (list new-second-row) (list new-third-row) (cdddr pixels))
                             (append current-row (list average))
                             result
                         )
