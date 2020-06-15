@@ -50,8 +50,92 @@
     ;Transform the image into grayscale and store the pixels into a list
     (define grayscale-image (color->gray bitmap-image))
     
-    (channel-put out-channel grayscale-image)
+    (define scaled-image (aspect-ratio grayscale-image))
+
+    (channel-put out-channel scaled-image)
     (channel-put out-channel 'end)
+)
+
+
+;Function that divides the image into grids of 3x3 pixels and reeplaces the grid with the average of those pixels
+;This is so the original aspect-ratio of the image is maintained, as an ASCII character is a lot bigger than a pixel
+(define (aspect-ratio pixels)
+
+    ;Get the rounded number of rows and columns in the image
+    (define _rows (exact-floor (/ (length pixels) 3)))
+    
+    (define _columns (exact-floor(/ (length (car pixels)) 3)))
+
+    ;Loop that goes over
+    (let loop
+        ([rows _rows]
+         [columns _columns]
+         [pixels pixels]
+         [current-row empty]
+         [result empty])
+        
+        (if (zero? rows)
+
+            result
+
+            (let()
+                (define pixel1 (caar pixels))
+                (define pixel2 (car (cdr (car pixels))))
+                ;(define pixel2 (cadar pixels))
+                (define pixel3 (caddar pixels))
+                (define pixel4 (car (car (cdr pixels))))
+                ;(define pixel4 (cdaar pixels))
+                (define pixel5 (car (cdr (car (cdr pixels)))))
+                ;(define pixel5 (cdadar pixels))
+                (define pixel6 (car (cdr (cdr (car (cdr pixels))))))
+                ;(define pixel6 (cdaddar pixels))
+                (define pixel7 (car (car (cdr (cdr pixels)))))
+                ;(define pixel7 (cddaar pixels))
+                (define pixel8 (car (cdr (car (cdr (cdr pixels))))))
+                ;(define pixel8 (cddadar pixels))
+                (define pixel9 (car (cdr (cdr (car (cdr (cdr pixels)))))))
+                ;(define pixel9 (cddaddar pixels))
+
+                (define average (/ (+ pixel1 pixel2 pixel3 pixel4 pixel5 pixel6 pixel7 pixel8 pixel9) 9))
+
+                (if (zero? (- columns 1 ))
+                    (let()
+                        (loop
+                            (- rows 1)
+                            _columns
+                            (cdddr pixels)
+                            empty
+                            (append result (list (append current-row (list average))))
+                        )                    
+                    )
+
+
+                    (let()
+
+                        ;(cadddr pixels)
+                        (define new-first-row (cdr (cdr (cdr (car pixels)))))
+                        ;(cdadddr pixels)
+                        (define new-second-row (cdr (cdr (cdr (car (cdr pixels))))))
+                        ;(cddadddr pixels)
+                        (define new-third-row (cdr (cdr (cdr (car (cdr (cdr pixels)))))))
+                        ;(printf "~a\n" (append (list new-first-row) (list new-second-row) (list new-third-row) (list (cdddr pixels))))
+                        (channel-put out-channel (format "Columns: ~a \n Pixels: ~a \n" columns (append (list (append (list new-first-row) (list new-second-row))) (list (append (list new-third-row) (list (cdddr pixels)))))))
+                        (loop
+                            _rows
+                            (- columns 1)
+                            (append (list new-third-row) (list (cdddr pixels)))
+                            (append current-row (list average))
+                            result
+                        )
+                    )
+
+                
+                )
+            )
+            
+        )
+    )
+
 
 )
 
