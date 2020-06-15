@@ -15,7 +15,7 @@
 ## Problem description
 
 Our project consists on a program that transforms an image into a representation of that image using ASCII code. The user will input the image they want to transform and the result will be printed into a text file. The resulting image will look as the following one:
-
+-[](Test_images/mona_lisa.jpg)
 
 ## Solution
 
@@ -36,9 +36,10 @@ The topics seen in class that we will use in the program are:
 4. Then use the following comand to start the program: 
   -> (enter! "Ascii_Generator.rkt")
 5. And then create your ASCII image with an begin the program using the following comand:
-  -> (main "Test_images/not_bad.jpg")
+  -> (main "Test_images/not_bad.jpg" "nameOfYourNewFile.txt")
   - main is the function that will start to run the program
   - Test_images is where we have saved our fine selection of images to test
   - After the  **/** the rest is the name of the image you wish to convert to ascii
+  - The last part is the name of the file type.txt where you want to save the ascii image
 6. And done enjoy your ASCII generator!!!
 
