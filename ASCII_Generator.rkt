@@ -18,34 +18,16 @@
 (define out (open-output-file "ascii_result.txt" #:exists 'truncate))
 
 
-;Thread for printing to a text file
-(define printer
-    (thread 
-        (lambda ()
-        (let loop
-            ()
-            ;The thread gets a message from the out-channet
-            (define msg (channel-get out-channel))
-            ;(displayln msg)
-            (cond
-                ;If the message is "end", the thread finishes
-                [(equal? msg 'end)
-                    ;The thread closes the output file
-                    (close-output-port out)
-                    (printf "Printer thread finishing\n")]
-                ;If the message is a string
-                [(string? msg)
-                    ;The thread prints it to the file and repeats the loop
-                    (display msg out)
-                    (loop)])))))
-
 
 ;Main function of the program
-(define (main in-file)
+(define (main in-file out-file)
 
     ;Load the image and save it into a bitmap structure
     (define bitmap-image (open-image in-file))
     
+    ;Create the output port
+    (define out (open-output-file out-file #:exists 'truncate))
+
     ;Transform the image into grayscale and store the pixels into a list
     ;Here our image is no longer a bitmap% and is instead a list of lists with the value of the pixels
     (define list-image (get-pixels bitmap-image))
@@ -56,10 +38,11 @@
     ;Chnge the pixels values into ascii
     (define ascii-image (pixels->ascii scaled-image))
 
-    (list-printer ascii-image)
+    ;Function that prints the list into a .txt
+    (list-printer ascii-image out)
 
-    (channel-put out-channel 'end)
-)
+    ;The output port is closed
+    (close-output-port out))
 
 
 ; ********************************************** Functions ************************************************************
@@ -256,7 +239,7 @@
 (define (translator pixel)
     ;Nested ifs to check if each value of the pixels
     (cond 
-        [(> pixel 225) " "] ;if the pixel is within range it will change its value to an espace
+        [(>= pixel 225) " "] ;if the pixel is within range it will change its value to an espace
         [(and (>= pixel 200) (< pixel 225)) "."] ;if the pixel is within range it will change its value to a .
         [(and (>= pixel 175) (< pixel 200)) ":"] ;if the pixel is within range it will change its value to a :
         [(and (>= pixel 150) (< pixel 175)) "-"] ;if the pixel is within range it will change its value to a -
@@ -271,7 +254,7 @@
 
 
 ;Function that transforms a prints a list of lists into a text file
-(define (list-printer image )
+(define (list-printer image out)
     (let loop
         ([image (cdr image)] ;variable to save the list of pixels
         [current-row (car image)]) ; variable to store the current row of pixel values
@@ -286,7 +269,7 @@
             (let ()
 
                 ;The character of the current row is printed into the text file
-                (channel-put out-channel (car current-row))
+                (display (car current-row) out)
 
                ;Check if the row is empty
                (if (empty? (cdr current-row))
@@ -294,7 +277,7 @@
                     ;If this is the last value of the row
                     (let()
                         ;An enter is printed into the text file
-                        (channel-put out-channel (format "\n"))
+                        (displayln " " out)
         
                         (loop
                             ;The row is deleted from the image
