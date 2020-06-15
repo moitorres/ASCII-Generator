@@ -53,16 +53,16 @@
     ;Scale the image to have the proper aspect ratio according to the size of the pixels
     (define scaled-image (aspect-ratio list-image))
 
-    (channel-put out-channel scaled-image)
+    ;Chnge the pixels values into ascii
+    (define ascii-image (pixels->ascii scaled-image))
+
+    (channel-put out-channel ascii-image)
     (channel-put out-channel 'end)
 )
 
 
-; ********************************************** WORK IN PROGRES ************************************************************
-;Function that transforms a list with the values of pixels to a list with ascii characters
-;(define (pixels->ascii)
+; ********************************************** Functions ************************************************************
 
-;)
 
 
 ;Function that opens an image from a file and returns a bitmap structure
@@ -212,3 +212,60 @@
                             (append (list new-first-row) (list new-second-row) (list new-third-row) (cdddr pixels)) ;The value for pixels is updated with the first three rows
                             (append current-row (list average)) ;The current average is appended to the list of results for the current row
                             result))))))) ;The resulting list stays the same
+
+;Function that transforms a list with the values of pixels to a list with ascii characters
+(define (pixels->ascii ascii-image )
+    (let loop
+        ([ascii-img (cdr ascii-image)] ;variable to save the list of pixels
+        [temp-img empty] ;temporal list to save the row of new ascii value
+        [result-img empty] ; final list to save the entire new list with the ascii value
+        [current-row (car ascii-image)]) ; variable to store the current row pixel values
+        ;If to check if the as list of pixels is empty
+        (if(empty? ascii-img)
+            ;If the ascii-img is empty it means the loop finish checking all the rows
+            result-img 
+
+             ;Else go and check each value per row
+            (let ()
+                ;Creates the value that stores the converted pixel into ascii
+              (define value (translator (car current-row)))
+               ;Check if the row is empyt 
+               (if (empty? (cdr current-row))
+                    ;If the row is empy then saves the converted ascii row in the result 
+                    (loop
+                        ;Changes row
+                        (cdr ascii-img)
+                        ;We empty the current-row 
+                        empty
+                        ;Saves the values in the result img
+                        (append result-img (list(append temp-img (list value))))
+                        ;Here the current-row becones the next line of the ascii-img
+                        (car ascii-img)
+                    )
+                    ;Else the currnet-row still has values
+                    (loop
+                        ;The line stays the same
+                        ascii-img
+                        ;We save each transformed value in a temporal list
+                        (append temp-img (list value))
+                        ;The result-img stays the same 
+                        result-img
+                        ;Moves the values inside the current-row
+                        ( cdr current-row)))))))
+
+;Function that changes the pixel values into ascii values
+(define (translator pixel)
+    ;Nested ifs to check if each value of the pixels
+    (cond 
+        [(> pixel 225) " "] ;if the pixel is within range it will change its value to an espace
+        [(and (>= pixel 200) (< pixel 225)) "."] ;if the pixel is within range it will change its value to a .
+        [(and (>= pixel 175) (< pixel 200)) ":"] ;if the pixel is within range it will change its value to a :
+        [(and (>= pixel 150) (< pixel 175)) "-"] ;if the pixel is within range it will change its value to a -
+        [(and (>= pixel 125) (< pixel 150)) "="] ;if the pixel is within range it will change its value to a =
+        [(and (>= pixel 100) (< pixel 125)) "+"] ;if the pixel is within range it will change its value to a +
+        [(and (>=  pixel 75) (< pixel 100)) "*"] ;if the pixel is within range it will change its value to a *
+        [(and (>= pixel 50) (< pixel 75)) "#"] ;if the pixel is within range it will change its value to a #
+        [(and (>= pixel 25) (< pixel 50)) "%"] ;if the pixel is within range it will change its value to a %
+        [(< pixel 25) "@"] ;if the pixel is within range it will change its value to a @
+
+    ))
