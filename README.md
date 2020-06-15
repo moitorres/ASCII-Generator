@@ -28,4 +28,5 @@ The topics seen in class that we will use in the program are:
 - Functional programming: We will be using racket to do the program, so we will need to use functional programming.
 - File input/output: We will read an image file and then output the result into a text file.
 - Lists: We will use lists to store the values for the pixels and to send them to the threads so they can process them.
+- Concurrency: We will use threds to write and print the ascii resutls at the same time.
 
