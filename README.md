@@ -2,8 +2,10 @@
 ---
 
 
-**Members                       Student ID
+**Members**                   **Student ID**
+
   Moisés Uriel Torres           A01021323   
+  
   Camila Rovirosa Ochoa         A01024192
 
 
