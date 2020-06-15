@@ -64,44 +64,6 @@
 
 ; ********************************************** Functions ************************************************************
 
-;Function that transforms a prints a list of lists into a text file
-(define (list-printer image )
-    (let loop
-        ([image (cdr image)] ;variable to save the list of pixels
-        [current-row (car image)]) ; variable to store the current row of pixel values
-
-        ;If to check if the list of pixels is empty
-        (if(empty? image)
-
-            ;If the ascii-img is empty it means the loop has finished and the program has finished as well
-            (printf "Image transformed to ascii succesfully \n")
-
-             ;Else, the loop continues
-            (let ()
-
-                ;The character of the current row is printed into the text file
-                (channel-put out-channel (car current-row))
-
-               ;Check if the row is empty
-               (if (empty? (cdr current-row))
-
-                    ;If the row is empy then saves the converted ascii row in the result 
-                    (let()
-                        (channel-put out-channel (format "\n"))
-                        (loop
-                            ;Changes row
-                            (cdr image)
-                            ;Here the current-row becones the next line of the ascii-img
-                            (car image)))
-
-                    ;Else the currnet-row still has values
-                    (loop
-                        ;The line stays the same
-                        image
-                        ;Moves the values inside the current-row
-                        ( cdr current-row)))))))
-
-
 ;Function that opens an image from a file and returns a bitmap structure
 (define (open-image filename)
     ;Create a bitmap
@@ -306,3 +268,43 @@
         [(< pixel 25) "@"] ;if the pixel is within range it will change its value to a @
 
     ))
+
+
+;Function that transforms a prints a list of lists into a text file
+(define (list-printer image )
+    (let loop
+        ([image (cdr image)] ;variable to save the list of pixels
+        [current-row (car image)]) ; variable to store the current row of pixel values
+
+        ;If to check if the list of pixels is empty
+        (if(empty? image)
+
+            ;If the ascii-img is empty it means the loop has finished and the program has finished as well
+            (printf "Image transformed to ascii succesfully \n")
+
+             ;Else, the loop continues
+            (let ()
+
+                ;The character of the current row is printed into the text file
+                (channel-put out-channel (car current-row))
+
+               ;Check if the row is empty
+               (if (empty? (cdr current-row))
+
+                    ;If this is the last value of the row
+                    (let()
+                        ;An enter is printed into the text file
+                        (channel-put out-channel (format "\n"))
+        
+                        (loop
+                            ;The row is deleted from the image
+                            (cdr image)
+                            ;The current-row becomes the next line of the image
+                            (car image)))
+
+                    ;If this isn't the last value of the row
+                    (loop
+                        ;The image stays the same
+                        image
+                        ;Moves the values inside the current-row
+                        ( cdr current-row)))))))
