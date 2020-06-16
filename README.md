@@ -33,7 +33,7 @@ For the process of creating the ASCII image, first, the original image is read a
 The topics seen in class that we used in the program are:
 - Functional programming: We used functional programming by using racket as our programming language.
 - File input/output: The program reads an image file and then outputs the result into a text file.
-- Lists: We used lists to store the values for the pixels and for sending t
+- Lists: We used lists to store the values for the pixels across the different functions.
 
 ## How to run the program
 1. Clone the git repository with "git clone" 

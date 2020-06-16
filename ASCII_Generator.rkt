@@ -12,13 +12,6 @@
 #lang racket
 (require racket/draw) ; Library to open an image and save it into a bitmap	 
 
-;Out-channel
-(define out-channel (make-channel))
-;Output file to write the results
-(define out (open-output-file "ascii_result.txt" #:exists 'truncate))
-
-
-
 ;Main function of the program
 (define (main in-file out-file)
 
